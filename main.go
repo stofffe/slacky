@@ -171,6 +171,20 @@ func readChannel(path string, users map[string]User) ([]Message, error) {
 			}
 			ts := time.Unix(int64(tsFloat), 0)
 
+			// remove subteam bloat
+			regex = regexp.MustCompile(`<!subteam[^@]*([^>]*)>`)
+			matches = regex.FindAllStringSubmatch(text, 999)
+			for _, match := range matches {
+				text = strings.Replace(text, match[0], match[1], 1)
+			}
+
+			// remove channel bloat
+			regex = regexp.MustCompile(`<#.*\|(.*)>`)
+			matches = regex.FindAllStringSubmatch(text, 999)
+			for _, match := range matches {
+				text = strings.Replace(text, match[0], "#"+match[1], 1)
+			}
+
 			messages = append(messages, Message{
 				User: user,
 				Text: text,
